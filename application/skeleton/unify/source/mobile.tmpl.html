@@ -7,9 +7,24 @@
     <meta name="apple-touch-fullscreen" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="viewport" content="target-densitydpi=medium-dpi, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0;"/>
-    <link rel="stylesheet" type="text/css" href="resource/${Namespace}/mobile/style.css" />
     
     <script type="text/javascript">
+      (function() {
+      var os = "iphoneos";
+      var paramsArray = location.search.substring(1).split("&");
+      var params = {};
+      for (var i=0,len=paramsArray.length; i<len; i++) {
+        var keyval = paramsArray[i].split("=");
+        params[keyval[0]] = keyval[1] || true;
+      }
+
+      var elem = document.createElement("link");
+      elem.rel = "stylesheet";
+      elem.type = "text/css";
+      elem.href = "resource/${Namespace}/mobile/style." + params["os"] + ".css";
+
+      document.getElementsByTagName("head")[0].appendChild(elem);
+
       var engine;
       if (window.opera && Object.prototype.toString.call(window.opera) == "[object Opera]") {
         engine = "presto";
@@ -31,7 +46,8 @@
         elem.src = "script/${Namespace}-" + variant + ".js";
         
         document.getElementsByTagName("head")[0].appendChild(elem);
-      }, false);    
+      }, false);
+      }());
     </script>
   </head>
   <body>    
