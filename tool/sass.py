@@ -31,12 +31,12 @@ def which(program):
 
 def main():
     basepath = os.getcwd() 
-    unifypath = os.path.dirname(sys.argv[0]) + "/unify-sass"
+    unifypath = basepath + "/" + os.path.dirname(sys.argv[0]) + "/unify-sass"
     
     jarpath = os.path.normpath(unifypath + "/sasscss.jar")
     unifysasspath = os.path.normpath(unifypath + "/unify-sass.rb")
-    sourcepath = os.path.normpath(sys.argv[1])
-    targetpath = os.path.normpath(sys.argv[2])
+    sourcepath = os.path.normpath(basepath + "/" + sys.argv[1])
+    targetpath = os.path.normpath(basepath + "/" + sys.argv[2])
     
     ruby_exec = which("ruby")
     if ruby_exec != None:
