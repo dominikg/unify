@@ -8,16 +8,17 @@ def get_immediate_subdirs(path):
 
 def run_sass(osname,resourcepath,unifypath,basepath):
     print "Processing " + osname
-    outfile = os.path.normpath(basepath + "/" + sys.argv[1] + "." + osname + ".sass")
-    genfile = os.path.normpath(basepath + "/" + sys.argv[1] + "." + osname + ".css")
-    infile = os.path.normpath(basepath + "/" + sys.argv[1])
+    origfilename = str.replace(basepath + "/" + sys.argv[1], ".sass", "")
+    outfile = os.path.normpath(origfilename + "." + osname + ".sass")
+    genfile = os.path.normpath(origfilename + "." + osname + ".css")
+    infile = os.path.normpath(origfilename + ".sass")
     destination = open(outfile, "w")
     destination.write("@import " + resourcepath + "/core.sass\n")
     destination.write("@import " + resourcepath + "/animation.sass\n")
     destination.write("@import " + resourcepath + "/" + osname + "/style.sass\n\n")
     shutil.copyfileobj(open(infile),destination)
     arg = ["python", unifypath + "/sass.py", outfile, genfile]
-    
+   
     subprocess.call(arg, cwd=unifypath)
 
 
