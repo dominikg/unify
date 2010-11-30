@@ -45,19 +45,32 @@ class Precompiler():
 
   def __function_detector(self, function, handler):
     out_content = []
+
     for line in self.__content:
-      matcher = re.match("^((\s*)(?:.*)):(?:\s*)(\S*)(?:\s*)$", line)
-      if matcher != None:
-        prefix = matcher.group(1)
-        indents = len(matcher.group(2))
-        command = matcher.group(3)
-        
-        if command[:len(function)] == function:
-          out_content.append(handler(prefix,command))
+      fntlinesplit = line.split(":")
+      if len(fntlinesplit) == 2:
+        fntline = fntlinesplit[1]
+        fntline = fntline.split(function)
+        if len(fntline) == 2:
+          fntline = fntline[1].lstrip()
+          if fntline[0] == "(":
+            brakets = 1
+            left = 1
+            while brakets > 0:
+              left += 1
+              if fntline[left] == "(":
+                brakets += 1
+              elif fntline[left] == ")":
+                brakets -= 1
+            #matcher = re.match("^(?:.*)\"(.*)\"(?:.*)$", fntline[0:left+1])
+            out_content.append(handler(fntlinesplit[0] + ":",fntline[0:left+1], line) + fntline[left+1:])
+          else:
+            out_content.append(line)
         else:
           out_content.append(line)
       else:
         out_content.append(line)
+
     self.__content = out_content
 
   def __path_finder(self, url, paths):
@@ -68,15 +81,14 @@ class Precompiler():
           return path
     return None
 
-  def __function_inline_image(self, prefix, command):
-    matcher = re.match("^inline_image\((.*)\)(\s*)$", command)
-    parameter = matcher.group(1)
-    urlmatcher = re.match(".*[\"'](.+)[\"'].*", parameter)
+  def __function_inline_image(self, prefix, command, origline):
+    urlmatcher = re.match("^(?:.*)\"(.*)\"(?:.*)$", command)
+    
     if urlmatcher != None:
       url = urlmatcher.group(1)
       path = self.__path_finder(url, self.__paths)
       if path:
-        print ("Found image :", path)
+        print ("Found image :", os.path.join(path, url))
         mime = ""
         ext = url[-4:1000]
         if (ext == ".png"):
@@ -87,12 +99,12 @@ class Precompiler():
           mime = "image/jpeg"
         elif (ext == ".gif"):
           mime = "image/gif"
-        return prefix + ": url(data:" + mime + ";base64," + self.__import_image(os.path.join(path, url)) + ")"
+        return prefix + " url(data:" + mime + ";base64," + self.__import_image(os.path.join(path, url)) + ")"
       else:
         print ("File not found : ", url)
     else:
-      print ("Variable detected : " , parameter)
-    return prefix + ":inline_image(\"" + self.__input_path + "\"," + matcher.group(1) + ")"
+      print ("Variable detected : " , command)
+    return origline
 
   def __import_image(self, filename):
     b64img = base64.encodebytes(open(filename, mode="rb").read()).decode("utf-8")
