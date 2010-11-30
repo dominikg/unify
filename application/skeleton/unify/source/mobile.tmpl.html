@@ -12,7 +12,9 @@
       (function() {
       var os = "iphoneos";
       var paramsArray = location.search.substring(1).split("&");
-      var params = {};
+      var params = {
+        os: os
+      };
       for (var i=0,len=paramsArray.length; i<len; i++) {
         var keyval = paramsArray[i].split("=");
         params[keyval[0]] = keyval[1] || true;
