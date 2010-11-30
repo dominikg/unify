@@ -9,6 +9,8 @@ class Precompiler():
     self.__paths = paths
     self.__content = []
 
+    self.__inline_files = []
+
   def run(self, filename):
     with open(filename, encoding="utf-8") as input_file:
       self.__input_file = input_file
@@ -25,6 +27,9 @@ class Precompiler():
   def write_to_file(self, filename):
     with open(filename, mode="w", encoding="utf-8") as output_file:
       output_file.write(self.get_content())
+
+  def get_inline_files(self):
+    return self.__inline_files
 
   def __token_detector(self, token, handler):
     out_content = []
@@ -88,7 +93,7 @@ class Precompiler():
       url = urlmatcher.group(1)
       path = self.__path_finder(url, self.__paths)
       if path:
-        print ("Found image :", os.path.join(path, url))
+        #print ("Found image :", os.path.join(path, url))
         mime = ""
         ext = url[-4:1000]
         if (ext == ".png"):
@@ -102,11 +107,12 @@ class Precompiler():
         return prefix + " url(data:" + mime + ";base64," + self.__import_image(os.path.join(path, url)) + ")"
       else:
         print ("File not found : ", url)
-    else:
-      print ("Variable detected : " , command)
+    #else:
+      #print ("Variable detected : " , command)
     return origline
 
   def __import_image(self, filename):
+    self.__inline_files.append(filename)
     b64img = base64.encodebytes(open(filename, mode="rb").read()).decode("utf-8")
     b64img = "".join(b64img.splitlines())
     return b64img
@@ -114,6 +120,7 @@ class Precompiler():
   def __import_file(self, filename):
     new_pre = Precompiler(self.__paths)
     new_pre.run(filename)
+    self.__inline_files += new_pre.get_inline_files()
     return new_pre.get_content()
 
   def __token_import(self, command):
