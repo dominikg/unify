@@ -5,9 +5,8 @@
 import re, os, base64
 
 class Precompiler():
-  def __init__(self, paths, variants):
+  def __init__(self, paths):
     self.__paths = paths
-    self.__variants = variants
     self.__content = []
 
   def run(self, filename):
@@ -78,8 +77,17 @@ class Precompiler():
       path = self.__path_finder(url, self.__paths)
       if path:
         print ("Found image :", path)
-        #return prefix + ":inline_image(\"" + path + "\"," + matcher.group(1) + ")"
-        return self.__import_image(os.path.join(path, url))
+        mime = ""
+        ext = url[-4:1000]
+        if (ext == ".png"):
+          mime = "image/png"
+        elif (ext == ".jpg"):
+          mime = "image/jpeg"
+        elif (ext == "jpeg"):
+          mime = "image/jpeg"
+        elif (ext == ".gif"):
+          mime = "image/gif"
+        return prefix + ": url(data:" + mime + ";base64," + self.__import_image(os.path.join(path, url)) + ")"
       else:
         print ("File not found : ", url)
     else:
@@ -87,14 +95,12 @@ class Precompiler():
     return prefix + ":inline_image(\"" + self.__input_path + "\"," + matcher.group(1) + ")"
 
   def __import_image(self, filename):
-    with open(filename, mode="rb") as image_file:
-      imgdata = image_file.read()
-    b64img = base64.encodebytes(imgdata)
-    print (b64img)
-    return str(b64img)
+    b64img = base64.encodebytes(open(filename, mode="rb").read()).decode("utf-8")
+    b64img = "".join(b64img.splitlines())
+    return b64img
 
   def __import_file(self, filename):
-    new_pre = Precompiler(self.__paths, self.__variants)
+    new_pre = Precompiler(self.__paths)
     new_pre.run(filename)
     return new_pre.get_content()
 
