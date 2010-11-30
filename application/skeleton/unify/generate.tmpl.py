@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 ################################################################################
 #
 #  qooxdoo - the new era of web development
@@ -49,7 +49,7 @@ qxpath = getQxPath()
 REAL_GENERATOR = os.path.join(qxpath, 'tool', 'bin', 'generator.py')
 
 if not os.path.exists(REAL_GENERATOR):
-    print "Cannot find real generator script under: \"%s\"; aborting" % REAL_GENERATOR
+    print ("Cannot find real generator script under: \"%s\"; aborting" % REAL_GENERATOR)
     sys.exit(1)
 
 argList = []

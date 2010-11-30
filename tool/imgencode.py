@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import base64
 import sys
@@ -16,4 +16,4 @@ for arg in sys.argv[1:]:
 
   content = open(arg).read()
   encoded = base64.standard_b64encode(content)
-  print "url(data:" + mime + ";base64," + encoded + ")"
+  print ("url(data:" + mime + ";base64," + encoded + ")")
