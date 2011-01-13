@@ -76,6 +76,10 @@ qx.Class.define("unify.ui.mobile.TitleBar",
         return;
       }
 
+      if (unify.bom.client.System.ANDROID) {
+        return;
+      }
+
       var NavigationManager = unify.view.mobile.NavigationManager.getInstance();
       var path = NavigationManager.getPath();
       var upElem = this.query("[rel=up]");
