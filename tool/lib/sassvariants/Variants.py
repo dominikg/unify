@@ -2,9 +2,10 @@
 # SASS Variants Precompiler
 # 
 #  Part of the unify project
+#  Homepage: unify-project.org
 #  License: MIT + Apache (V2)
-#  Homepage: unify-training.com
-#  Copyright: 2010 Sebastian Fastner, Mainz, http://www.sebastianfastner.de
+#  
+#  Copyright: 2010 Sebastian Fastner, Mainz, http://www.unify-training.com
 #
 
 import re, os, base64
