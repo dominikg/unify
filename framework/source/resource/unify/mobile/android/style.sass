@@ -2,11 +2,9 @@
 //	MIXIN: PADDED LAYER
 // ***************************************************************************************************
 
-=padded-layer($border_color: #b4b4b4, $border_radius: 8px)
-  background-image: inline_image(unquote("pinstripes.png"))
-  background-color: rgb(203, 210, 216)
+=padded-layer($border_color: #333, $border_radius: 8px)
+  background-color: black
   .content
-    padding: 10px
     > *:first-child
       margin-top: 0 !important
     > *:last-child
@@ -21,18 +19,13 @@
       font-weight: bold
     > p, > ul > li
       padding: 10px
-      border: 1px solid $border_color
-      background-color: white
+      border-bottom: 1px solid $border_color
     > p
       +border-radius($border_radius)
       font-size: 15px
     > ul > li
-      border-bottom-style: none
-      &:first-child
-        +border-top-radius($border_radius)
       &:last-child
-        +border-bottom-radius($border_radius)
-        border-bottom-style: solid
+        border-bottom-style: none
 
 // ***************************************************************************************************
 //	 MIXIN: KEY-VALUE LIST
@@ -64,8 +57,10 @@
  * May show an arrow to indicate sub content using (self-closed) "hr" element
 
 =navigation-list
-  $selection_start: rgb(66, 134, 245)
-  $selection_end: rgb(25, 79, 219)
+  //$selection_start: rgb(66, 134, 245)
+  $selection_start: rgb(0, 255, 0)
+  //$selection_end: rgb(25, 79, 219)
+  $selection_end: rgb(0, 150, 0)
   $count: rgb(130, 151, 188)
   li
     +hbox
@@ -98,9 +93,6 @@
         // http://webkit.org/blog/164/background-clip-text/
         background: white
         color: ($selection_start + $selection_end) / 2
-      > hr
-        after:
-          content: inline_image(unquote("list/arrow-selected.png"))
 
 // ***************************************************************************************************
 //	 MIXIN: BUTTON
@@ -200,11 +192,11 @@ body
 
 .title-bar,
 .tool-bar
-  height: 44px
+  height: 53px
   +hbox
   padding: 0 3px
   background: inline_image(unquote("tool-bar/background.png"))
-  border-bottom: 1px solid rgb(43, 53, 76)
+  border-bottom: 1px solid #131313
   &:last-child
     border-bottom: 0px none
     border-top: 1px solid rgb(43, 53, 76)
