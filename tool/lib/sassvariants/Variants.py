@@ -16,8 +16,8 @@ class Variants():
       sassname = self.__get_filename(variant)
       outfile = open(sassname, mode="w", encoding="utf-8")
 
-      vcontent = "@import " + os.path.join(self.__projectpath, "style." + variant + ".sass") + "\n"
-      vcontent += "@import " + os.path.join(self.__unifypath, "framework/source/resource/unify/mobile", "style." + variant + ".sass") + "\n"
+      vcontent = "@import " + os.path.join(self.__unifypath, "framework/source/resource/unify/mobile", "style." + variant + ".sass") + "\n"
+      vcontent += "@import " + os.path.join(self.__projectpath, "style." + variant + ".sass") + "\n"
       vcontent += content
 
       outfile.write(vcontent)
