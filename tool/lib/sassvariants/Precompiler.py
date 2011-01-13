@@ -1,5 +1,10 @@
 #
 # SASS Precompiler
+# 
+#  Part of the unify project
+#  License: MIT + Apache (V2)
+#  Homepage: unify-training.com
+#  Copyright: 2010 Sebastian Fastner, Mainz, http://www.sebastianfastner.de
 #
 
 import re, os, base64
