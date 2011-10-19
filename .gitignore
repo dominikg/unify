@@ -7,3 +7,5 @@ unify/application/widgets/source/script
 unify/application/flicky/log.txt
 .DS_Store
 .settings.xml
+
+cache.db.*
