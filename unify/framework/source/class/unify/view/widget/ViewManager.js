@@ -625,7 +625,7 @@ qx.Class.define("unify.view.widget.ViewManager", {
     /**
      * {Map} Maps the position of the layer to the platform specific transform value.
      */
-    __positions : qx.core.Environment.select("unify.positionshift",
+    /*__positions : qx.core.Environment.select("unify.positionshift",
     {
       "3d" :
       {
@@ -642,7 +642,13 @@ qx.Class.define("unify.view.widget.ViewManager", {
         left : "translate(-100%,0)",
         center : "translate(0,0)"
       }
-    }),
+    }),*/
+    __positions : {
+      bottom : "translate3d(0,100%,0)",
+      right : "translate3d(100%,0,0)",
+      left : "translate3d(-100%,0,0)",
+      center : "translate3d(0,0,0)"
+    },
     
     /**
      * Internal setter method for view switching

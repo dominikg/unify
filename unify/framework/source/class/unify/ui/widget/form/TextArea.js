@@ -13,6 +13,10 @@
 */
 
 /**
+ * @require {qx.event.handler.Input}
+ */
+
+/**
  * EXPERIMENTAL
  * Input component
  */

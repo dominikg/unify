@@ -11,7 +11,9 @@
 /*
 #require(qx.event.handler.Input)
 */
-
+/**
+ * @require {qx.event.handler.Input}
+ */
 /**
  * EXPERIMENTAL
  * Input component
