@@ -7,7 +7,6 @@
     Copyright: 2011, Sebastian Fastner, Mainz, Germany, http://unify-training.com
 
 *********************************************************************************************** */
-
 /**
  * EXPERIMENTAL
  */
