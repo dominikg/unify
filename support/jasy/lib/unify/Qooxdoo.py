@@ -1,5 +1,5 @@
 
-import sys
+import sys, re
 
 class Patcher:
     __breakpatchmap = {}
@@ -7,6 +7,8 @@ class Patcher:
 
     def __init__(self, session):
       self.__session = session
+
+      self.__assetRe = re.compile(r"#asset\(([^\)]+)\)")
 
       self.__breakpatchmap = {
         "qx.Bootstrap" : ["qx.data.IListData"],
@@ -46,12 +48,29 @@ class Patcher:
         for clazz in project.getClasses():
           clazzObj = project.getClassByName(clazz)
           self.__patchClass(clazzObj.getName(), clazzObj.getMeta())
+          if clazzObj.getName() == "unify.ui.widget.container.NavigationBar":
+            self.__detectAsset(clazzObj.getTree(), clazzObj.getMeta())
+            #print("Detect assets %s"%clazzObj.getTree())
 
     def __patchClass(self, className, meta):
-      """ Patch a tree with given Information """
+      """ Patch meta data of classes with given Information """
 
       if className in self.__breakpatchmap:
         meta.breaks.update(self.__breakpatchmap[className])
       
       if className in self.__requirepatchmap:
         meta.requires.update(self.__requirepatchmap[className])
+
+    def __detectAsset(self, tree, meta):
+      """ Update asset meta data with qooxdoo's own meta tags """
+
+      for node in list(tree):
+        if hasattr(node, "comments"):
+          comments = getattr(node, "comments")
+          for comment in comments:
+            meta.assets.update(self.__parseAsset(comment))
+
+        self.__detectAsset(node, meta)
+
+    def __parseAsset(self, comment):
+      return self.__assetRe.findall(comment.text)
