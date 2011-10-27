@@ -29,6 +29,10 @@
     "resource"    : "source/resource",
     "translation" : "source/translation",
     "type"        : "application"
-  }
+  },
+
+  "name" : "${Name}",
+  "package" : "",
+  "kind" : "full"
 }
 
