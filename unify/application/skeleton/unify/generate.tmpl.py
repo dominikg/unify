@@ -1,72 +1,116 @@
-#!/usr/bin/env python
-################################################################################
+#!/usr/bin/env python3
+
+APPLICATION = "${Namespace}.Application"
+
+UNIFYPATH = '${REL_QOOXDOO_PATH}/../../unify'
+JASYPATH = UNIFYPATH + "/../jasy"
+
+# Extend PYTHONPATH with 'lib'
+import sys, os
+from time import strftime
+
+sys.path.insert(0, "%s/lib" % JASYPATH)
+sys.path.insert(0, "%s/support/jasy/lib" % UNIFYPATH)
+
+# Import JavaScript tooling
+from jasy import *
+from unify import Qooxdoo
+
+
+
 #
-#  qooxdoo - the new era of web development
+# Tasks
 #
-#  http://qooxdoo.org
-#
-#  Copyright:
-#    2008 - 2009 1&1 Internet AG, Germany, http://www.1und1.de
-#
-#  License:
-#    LGPL: http://www.gnu.org/licenses/lgpl.html
-#    EPL: http://www.eclipse.org/org/documents/epl-v10.php
-#    See the LICENSE file in the project's top-level directory for details.
-#
-#  Authors:
-#    * Thomas Herchenroeder (thron7)
-#
-################################################################################
 
-##
-# This is a stub proxy for the real generator.py
-##
+@task
+def clear():
+    # Setup session
+    session = Session()
 
-import sys, os, re, subprocess
+    # Clearing cache
+    logging.info("Clearing cache...")
+    session.clearCache()
 
-CMD_PYTHON = 'python'
-QOOXDOO_PATH = '${REL_QOOXDOO_PATH}'
 
-def getQxPath():
-    path = QOOXDOO_PATH
-    # try updating from config file
-    if os.path.exists('config.json'):
-        # "using QOOXDOO_PATH from config.json"
-        qpathr=re.compile(r'"QOOXDOO_PATH"\s*:\s*"([^"]*)"\s*,?')
-        conffile = open('config.json')
-        aconffile = conffile.readlines()
-        for line in aconffile:
-            mo = qpathr.search(line)
-            if mo:
-                path = mo.group(1)
-                break # assume first occurrence is ok
-    path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), path))
 
-    return path
+@task
+def simple():
+    # Setup session
+    session = Session()
+    session.addProject(Project("."))
 
-os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))  # switch to skeleton dir
-qxpath = getQxPath()
-REAL_GENERATOR = os.path.join(qxpath, 'tool', 'bin', 'generator.py')
-
-if not os.path.exists(REAL_GENERATOR):
-    print "Cannot find real generator script under: \"%s\"; aborting" % REAL_GENERATOR
-    sys.exit(1)
-
-argList = []
-argList.append(CMD_PYTHON)
-argList.append(REAL_GENERATOR)
-argList.extend(sys.argv[1:])
-if sys.platform == "win32":
-    argList1=[]
-    for arg in argList:
-        if arg.find(' ')>-1:
-            argList1.append('"%s"' % arg)
-        else:
-            argList1.append(arg)
-    argList = argList1
-else:
-    argList = ['"%s"' % x for x in argList]  # quote argv elements
+    # Collecting projects
+    resolver = Resolver(session.getProjects())
+    resolver.addClassName("ootest.Test")
     
-cmd = " ".join(argList)
-retval = subprocess.call(cmd, shell=True)
-sys.exit(retval)
+    # Resolving classes
+    classes = Sorter(resolver).getSortedClasses()
+    
+    # Compressing classes
+    compressedCode = Combiner(classes).getCompressedCode()
+    
+    # Writing files
+    writefile("build/simple.js", compressedCode)
+
+
+
+@task
+def build():
+    # Setup session
+    session = Session()
+    session.addProject(Project("%s/unify/framework" % UNIFYPATH))
+    session.addProject(Project("%s/qooxdoo/qooxdoo/framework" % UNIFYPATH))
+    session.addProject(Project("."))
+    #session.permutateField("debug")
+    #session.permutateField("es5")
+    #session.permutateField("engine")
+    session.permutateField("locale", ["en"])
+
+    patcher = Qooxdoo.Patcher(session)
+    patcher.patchClasses()
+    
+    # Permutation independend config
+    optimization = Optimization() #Optimization("unused", "privates", "variables", "declarations", "blocks")
+    #optimization = Optimization("unused", "privates", "variables", "declarations", "blocks")
+    formatting = Format("semicolon", "comma")
+    #formatting = Format()
+
+    # Store loader script
+    loaderIncluded = session.writeLoader("build/loader.js", optimization, formatting)
+    
+    # Copy HTML file from source
+    updatefile("source/index.html", "build/index.html")
+
+    # Process every possible permutation
+    permutations = session.getPermutations()
+    for pos, permutation in enumerate(permutations):
+        logging.info("Permutation %s/%s" % (pos+1, len(permutations)))
+
+        # Get projects
+        projects = session.getProjects(permutation)
+
+        # Resolving dependencies
+        resolver = Resolver(projects, permutation)
+        resolver.addClassName(APPLICATION)
+        resolver.excludeClasses(loaderIncluded)
+        classes = resolver.getIncludedClasses()
+
+        # Compressing classes
+        translation = session.getTranslation(permutation.get("locale"))
+        classes = Sorter(resolver, permutation).getSortedClasses()
+        compressedCode = Combiner(classes).getCompressedCode(permutation, translation, optimization, formatting)
+        
+        # Boot logic
+        configCode = "window.qx = { $$environment : { \"qx.application\" : \"%s\" }, $$loader : { scriptLoaded: false } };" % (APPLICATION)
+        configCode += "window.qx.$$environment[\"qx.debug\"] = true;"
+        configCode += "window.qx.$$build = '%s';" % strftime("%Y-%m-%d %H:%M:%S")
+        bootCode = "window.qx.$$loader.scriptLoaded = true;"
+
+        # Write file
+        writefile("build/oo-%s.js" % permutation.getChecksum(), configCode + compressedCode + bootCode)
+
+#
+# Execute Jasy
+#
+
+run()
