@@ -1,6 +1,8 @@
 
 import sys, re
 
+from jasy.parser.Node import Node
+
 class Patcher:
     __breakpatchmap = {}
     __requirepatchmap = {}
@@ -48,9 +50,9 @@ class Patcher:
         for clazz in project.getClasses():
           clazzObj = project.getClassByName(clazz)
           self.__patchClass(clazzObj.getName(), clazzObj.getMeta())
-          if clazzObj.getName() == "unify.ui.widget.container.NavigationBar":
-            self.__detectAsset(clazzObj.getTree(), clazzObj.getMeta())
-            #print("Detect assets %s"%clazzObj.getTree())
+          self.__treeWalker(clazzObj, [self.__detectAsset, self.__patchEnvironment])
+
+      self.__session.clearCache()
 
     def __patchClass(self, className, meta):
       """ Patch meta data of classes with given Information """
@@ -61,16 +63,69 @@ class Patcher:
       if className in self.__requirepatchmap:
         meta.requires.update(self.__requirepatchmap[className])
 
-    def __detectAsset(self, tree, meta):
+    def __treeWalker(self, clazz, modifiers, startNode=None):
+      if startNode == None:
+        startNode = clazz.getTree()
+      for node in list(startNode):
+        for modifier in modifiers:
+          modifier(node, clazz)
+        self.__treeWalker(clazz, modifiers, node)
+
+    def __detectAsset(self, node, clazz):
       """ Update asset meta data with qooxdoo's own meta tags """
-
-      for node in list(tree):
-        if hasattr(node, "comments"):
-          comments = getattr(node, "comments")
-          for comment in comments:
-            meta.assets.update(self.__parseAsset(comment))
-
-        self.__detectAsset(node, meta)
+      if hasattr(node, "comments"):
+        for comment in getattr(node, "comments"):
+          clazz.getMeta().assets.update(self.__parseAsset(comment))
 
     def __parseAsset(self, comment):
       return self.__assetRe.findall(comment.text)
+
+    def __getCallName(self, node):
+      if node.type == "call":
+        return self.__getCallName(node[0])
+
+      if node.type == "identifier":
+        return node.value
+
+      if node.type == "dot":
+        return ".".join([self.__getCallName(node[0]), self.__getCallName(node[1])])
+      
+      return ""
+
+
+    def __patchEnvironment(self, node, clazz):
+      """ Patch all classes to use Jasy Environment """
+
+      if node.type == "call":
+        identifier = self.__getCallName(node)
+
+        if identifier == "qx.core.Environment.get":
+          p1 = Node(None, "identifier")
+          p1.value = "jasy"
+          p2 = Node(None, "identifier")
+          p2.value = "Env"
+          p3 = Node(None, "identifier")
+          p3.value = "get"
+          jasyEnv = Node(None, "dot", [Node(None, "dot", [p1, p2]), p3])
+          node.replace(node[0], jasyEnv)
+
+        elif identifier == "qx.core.Environment.select":
+          p1 = Node(None, "identifier")
+          p1.value = "jasy"
+          p2 = Node(None, "identifier")
+          p2.value = "Env"
+          p3 = Node(None, "identifier")
+          p3.value = "select"
+          jasyEnv = Node(None, "dot", [Node(None, "dot", [p1, p2]), p3])
+          node.replace(node[0], jasyEnv)
+
+        elif identifier == "qx.core.Environment.add":
+          p1 = Node(None, "identifier")
+          p1.value = "jasy"
+          p2 = Node(None, "identifier")
+          p2.value = "Env"
+          p3 = Node(None, "identifier")
+          p3.value = "define"
+          jasyEnv = Node(None, "dot", [Node(None, "dot", [p1, p2]), p3])
+          node.replace(node[0], jasyEnv)
+        
