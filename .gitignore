@@ -9,3 +9,4 @@ unify/application/flicky/log.txt
 .settings.xml
 
 cache.db.*
+__pycache__
