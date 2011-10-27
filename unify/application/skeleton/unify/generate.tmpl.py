@@ -2,8 +2,8 @@
 
 APPLICATION = "${Namespace}.Application"
 
-UNIFYPATH = '${REL_QOOXDOO_PATH}/../../unify'
-JASYPATH = UNIFYPATH + "/../jasy"
+UNIFYPATH = '${REL_QOOXDOO_PATH}/../..'
+JASYPATH = UNIFYPATH + "/support/jasy/jasy"
 
 # Extend PYTHONPATH with 'lib'
 import sys, os
@@ -33,24 +33,24 @@ def clear():
 
 
 
-@task
-def simple():
-    # Setup session
-    session = Session()
-    session.addProject(Project("."))
-
-    # Collecting projects
-    resolver = Resolver(session.getProjects())
-    resolver.addClassName("ootest.Test")
-    
-    # Resolving classes
-    classes = Sorter(resolver).getSortedClasses()
-    
-    # Compressing classes
-    compressedCode = Combiner(classes).getCompressedCode()
-    
-    # Writing files
-    writefile("build/simple.js", compressedCode)
+#@task
+#def simple():
+#    # Setup session
+#    session = Session()
+#    session.addProject(Project("."))
+#
+#    # Collecting projects
+#    resolver = Resolver(session.getProjects())
+#    resolver.addClassName("ootest.Test")
+#    
+#    # Resolving classes
+#    classes = Sorter(resolver).getSortedClasses()
+#    
+#    # Compressing classes
+#    compressedCode = Combiner(classes).getCompressedCode()
+#    
+#    # Writing files
+#    writefile("build/simple.js", compressedCode)
 
 
 
