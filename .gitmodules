@@ -7,3 +7,6 @@
 [submodule "support/phonegap-android"]
 	path = support/phonegap-android
 	url = https://github.com/unify/phonegap-android.git
+[submodule "support/jasy/jasy"]
+	path = support/jasy/jasy
+	url = https://github.com/wpbasti/jasy.git
