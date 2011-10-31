@@ -8,14 +8,22 @@ JASYPATH = UNIFYPATH + "/support/jasy/jasy"
 # Extend PYTHONPATH with 'lib'
 import sys, os
 from time import strftime
-
-sys.path.insert(0, "%s/lib" % JASYPATH)
+sys.path.insert(0, "%s/lib/jasy" % JASYPATH)
 sys.path.insert(0, "%s/support/jasy/lib" % UNIFYPATH)
 
-# Import JavaScript tooling
-from jasy import *
-from unify import Qooxdoo
+from jasy.Error import *
+from jasy.Session import *
+from jasy.Project import *
+from jasy.Resolver import *
+from jasy.Sorter import *
+from jasy.Combiner import *
+from jasy.Assets import *
+from jasy.Optimization import *
+from jasy.Format import *
+from jasy.File import *
+from jasy.Task import *
 
+from unify import Qooxdoo
 
 
 #
@@ -107,10 +115,15 @@ def build():
         bootCode = "window.qx.$$loader.scriptLoaded = true;"
 
         # Write file
-        writefile("build/oo-%s.js" % permutation.getChecksum(), configCode + compressedCode + bootCode)
+        writefile("build/${Namespace}-%s.js" % permutation.getChecksum(), configCode + compressedCode + bootCode)
 
 #
 # Execute Jasy
 #
 
-run()
+#run()
+if __name__ == "__main__":
+    import jasy
+
+    (options, args) = jasy.parseCommandline()
+    jasy.runTasks(args)
