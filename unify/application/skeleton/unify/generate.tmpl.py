@@ -66,16 +66,20 @@ def clear():
 def build():
     # Setup session
     session = Session()
-    session.addProject(Project("%s/unify/framework" % UNIFYPATH))
-    session.addProject(Project("%s/qooxdoo/qooxdoo/framework" % UNIFYPATH))
-    session.addProject(Project("."))
+    
+    patcher = Qooxdoo.Patcher(session)
+    patcher.patchClasses()
+    
+    session.addProject(Project("%s/unify/framework" % UNIFYPATH, patcher.treePatcher))
+    session.addProject(Project("%s/qooxdoo/qooxdoo/framework" % UNIFYPATH, patcher.treePatcher))
+    session.addProject(Project(".", patcher.treePatcher), True)
     #session.permutateField("debug")
     #session.permutateField("es5")
     #session.permutateField("engine")
     session.permutateField("locale", ["en"])
-
-    patcher = Qooxdoo.Patcher(session)
-    patcher.patchClasses()
+    
+    session.setField("qx.application", APPLICATION)
+    session.setField("qx.debug", True)
     
     # Permutation independend config
     optimization = Optimization() #Optimization("unused", "privates", "variables", "declarations", "blocks")
@@ -109,10 +113,9 @@ def build():
         compressedCode = Combiner(classes).getCompressedCode(permutation, translation, optimization, formatting)
         
         # Boot logic
-        configCode = "window.qx = { $$environment : { \"qx.application\" : \"%s\" }, $$loader : { scriptLoaded: false } };" % (APPLICATION)
-        configCode += "window.qx.$$environment[\"qx.debug\"] = true;"
-        configCode += "window.qx.$$build = '%s';" % strftime("%Y-%m-%d %H:%M:%S")
-        bootCode = "window.qx.$$loader.scriptLoaded = true;"
+        configCode = "window.qx = { $$$$loader : { scriptLoaded: false } };"
+        configCode += "window.qx.$$$$build = '%s';" % strftime("%Y-%m-%d %H:%M:%S")
+        bootCode = "window.qx.$$$$loader.scriptLoaded = true;"
 
         # Write file
         writefile("build/${Namespace}-%s.js" % permutation.getChecksum(), configCode + compressedCode + bootCode)
