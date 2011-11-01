@@ -52,10 +52,10 @@ class Patcher:
             self.__checkPatchmaps(tree, className)
         
         for node in list(tree):
+            self.treePatcher(node, className)
+            
             for modifier in self.__modifiers:
                 modifier(node)
-                
-            self.treePatcher(node, className)
 
 
     def patchClasses(self):
@@ -123,17 +123,106 @@ class Patcher:
         return self.__assetRe.findall(comment.text)
 
 
-    def __getCallName(self, node):
-        if node.type == "call":
+    def __getCallName(self, node, initNodeType = "call"):
+        if node.type == initNodeType and len(node) > 0:
             return self.__getCallName(node[0])
-  
+ 
         if node.type == "identifier":
             return node.value
   
         if node.type == "dot":
-            return ".".join([self.__getCallName(node[0]), self.__getCallName(node[1])])
-        
+            return ".".join([self.__getCallName(node[0], initNodeType), self.__getCallName(node[1], initNodeType)])
+            
         return ""
+
+
+    def __getFirstByType(self, node, type):
+        children = list(node)
+        
+        for child in children:
+            if child.type == type:
+                return child
+            
+        return None
+    
+    
+    def __getAllByType(self, node, type):
+        children = list(node)
+        ret = []
+        
+        for child in children:
+            if child.type == type:
+                ret.append(child)
+            
+        return ret
+    
+    
+    def __createValueNode(self, type, value):
+        node = Node(None, type)
+        node.value = value
+        
+        return node
+    
+    
+    def __createCall(self, fntname, arguments):
+        fnt = str(fntname).split(".")
+        
+        fntNode = None
+        if len(fnt) > 1:
+            i1 = self.__createValueNode("identifier", fnt.pop(0))
+            i2 = self.__createValueNode("identifier", fnt.pop(0))
+            fntNode = Node(None, "dot", [i1, i2])
+            
+            for fntpart in fnt:
+                fntNode = Node(None, "dot", [fntNode, self.__createValueNode("identifier", fntpart)])
+        else:
+            fntNode = self.__createValueNode("identifier", fnt.pop(0))
+        
+        argsNode = Node(None, "list")
+        for argument in arguments:
+            argsNode.append(self.__createValueNode("string", argument))
+        
+        call = Node(None, "call", [fntNode, argsNode])
+
+        return call
+    
+    
+    def __createHook(self, queryFnt, queryValue, resultValue, thenPart, elsePart):
+        condition = Node(None, "eq", [
+            self.__createCall(queryFnt, [queryValue]),
+            self.__createValueNode("string", resultValue)
+        ])
+        hook = Node(None, "hook")
+        hook.append(condition, "condition")
+        hook.append(elsePart, "elsePart")
+        hook.append(thenPart, "thenPart")
+        
+        return hook
+    
+
+    def __dispatchSelect(self, node):
+        obj = self.__getFirstByType(node, "list")
+        
+        query = self.__getFirstByType(obj, "string").value
+        resultObjects = self.__getAllByType(self.__getFirstByType(obj, "object_init"), "property_init")
+        
+        hookList = {}
+        default = None
+        
+        for resultObject in resultObjects:
+            identifier = list(resultObject)[0].value
+            result = list(resultObject)[1]
+            if identifier == "default":
+                default = result
+            else:
+                hookList[identifier] = result
+                
+        newNode = default if default != None else Node(None, "null")
+        for key, value in hookList.items():
+            newNode = self.__createHook("jasy.Env.get", query, key, value, newNode)
+        
+        parent = node.parent
+        parent.replace(node, newNode)
 
 
     def __patchEnvironment(self, node):
@@ -143,32 +232,42 @@ class Patcher:
             identifier = self.__getCallName(node)
   
             if identifier == "qx.core.Environment.get":
-                p1 = Node(None, "identifier")
-                p1.value = "jasy"
-                p2 = Node(None, "identifier")
-                p2.value = "Env"
-                p3 = Node(None, "identifier")
-                p3.value = "getValue"
+                p1 = self.__createValueNode("identifier", "jasy")
+                p2 = self.__createValueNode("identifier", "Env")
+                p3 = self.__createValueNode("identifier", "getValue")
                 jasyEnv = Node(None, "dot", [Node(None, "dot", [p1, p2]), p3])
                 node.replace(node[0], jasyEnv)
     
-            #elif identifier == "qx.core.Environment.select":
-            #  p1 = Node(None, "identifier")
-            #  p1.value = "jasy"
-            #  p2 = Node(None, "identifier")
-            #  p2.value = "Env"
-            #  p3 = Node(None, "identifier")
-            #  p3.value = "select"
-            #  jasyEnv = Node(None, "dot", [Node(None, "dot", [p1, p2]), p3])
-            #  node.replace(node[0], jasyEnv)
+            elif identifier == "qx.core.Environment.select":
+                self.__dispatchSelect(node)
     
             elif identifier == "qx.core.Environment.add":
-                p1 = Node(None, "identifier")
-                p1.value = "jasy"
-                p2 = Node(None, "identifier")
-                p2.value = "Env"
-                p3 = Node(None, "identifier")
-                p3.value = "define"
+                p1 = self.__createValueNode("identifier", "jasy")
+                p2 = self.__createValueNode("identifier", "Env")
+                p3 = self.__createValueNode("identifier", "define")
                 jasyEnv = Node(None, "dot", [Node(None, "dot", [p1, p2]), p3])
                 node.replace(node[0], jasyEnv)
-          
+                
+        elif node.type == "declaration":
+            # Replace =qx.core.Environment;
+            identifier = self.__getCallName(node, node.type)
+            
+            if identifier == "qx.core.Environment":
+                p1 = self.__createValueNode("identifier", "jasy")
+                p2 = self.__createValueNode("identifier", "Env")
+                jasyEnv = Node(None, "dot", [p1, p2])
+                node.replace(node[0], jasyEnv)
+                
+        elif node.type == "and":
+            # Replace qx.core&&qx.core.Environment
+            identifier1 = self.__getCallName(node[0], node.type)
+            identifier2 = self.__getCallName(node[1], node.type)
+            
+            p1 = self.__createValueNode("identifier", "jasy")
+            p2 = self.__createValueNode("identifier", "Env")
+            jasyEnv = Node(None, "dot", [p1, p2])
+            
+            if identifier1 == "qx.core.Environment":
+                node.replace(node[0], jasyEnv)
+            elif identifier2 == "qx.core.Environment":
+                node.replace(node[1], jasyEnv)
