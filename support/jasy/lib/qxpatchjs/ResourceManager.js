@@ -11,19 +11,22 @@
  */
 (function(global) 
 {
-	console.log("RESOURCE MANAGER LOADED");
-	
-	
 	Module("qxpatchjs.ResourceManager",
 	{
+		getInstance : function()
+		{
+			return qxpatchjs.ResourceManager;
+		},
+		
 		/**
 		 * Whether the registry has information about the given asset.
 		 *
 		 * @param id {String} The asset to get the information for
 		 * @return {Boolean} <code>true</code> when the asset is known.
 		 */
-		has : function(id) {
-			return Asset.has(id);
+		has : function(id)
+		{
+			return jasy.Asset.has(id);
 		},
 
 
@@ -32,7 +35,7 @@
 		 */
                 getImageWidth : function(id)
                 {
-                        return Asset.getImageSize(id).width;
+                        return jasy.Asset.getImageSize(id).width;
                 },
                 
                 /**
@@ -40,7 +43,7 @@
 		 */
                 getImageHeight : function(id)
                 {
-                        return Asset.getImageSize(id).height;
+                        return jasy.Asset.getImageSize(id).height;
                 },
                 
 
@@ -55,7 +58,7 @@
 		 */
 		getImageSprite : function(id)
 		{
-			return Asset.getImageSprite(id);
+			return jasy.Asset.getImageSprite(id);
 		},
 
 
@@ -68,7 +71,7 @@
 		 */
 		toUri : function(id)
 		{
-                        return Asset.toUri(id);
+                        return jasy.Asset.toUri(id);
 		},
                 
                 getInstance : function()
@@ -93,7 +96,7 @@
                 
                 toDataUri : function(id)
                 {
-                        return Asset.toUri(id); // TODO
+                        return jasy.Asset.toUri(id); // TODO
                 }
 	});	
 })(this);

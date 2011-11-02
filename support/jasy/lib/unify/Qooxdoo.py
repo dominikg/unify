@@ -228,6 +228,15 @@ class Patcher:
         parent.replace(node, newNode)
 
 
+    def __replaceResourceManager(self, node):
+        name = list(node)[0]
+        p1 = self.__createValueNode("identifier", "qxpatchjs")
+        p2 = self.__createValueNode("identifier", "ResourceManager")
+        p3 = self.__createValueNode("identifier", "getInstance")
+        newNode = Node(None, "dot", [Node(None, "dot", [p1, p2]), p3])
+        node.replace(name, newNode)
+
+
     def __patchEnvironment(self, node):
         """ Patch all classes to use Jasy Environment """
   
@@ -250,6 +259,9 @@ class Patcher:
                 p3 = self.__createValueNode("identifier", "define")
                 jasyEnv = Node(None, "dot", [Node(None, "dot", [p1, p2]), p3])
                 node.replace(node[0], jasyEnv)
+                
+            elif identifier == "qx.util.ResourceManager.getInstance":
+                self.__replaceResourceManager(node)
                 
         elif node.type == "declaration":
             # Replace =qx.core.Environment;
