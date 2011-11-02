@@ -2,7 +2,8 @@
 
 APPLICATION = "${Namespace}.Application"
 
-UNIFYPATH = '${REL_QOOXDOO_PATH}/../..'
+QOOXDOOPATH = '${REL_QOOXDOO_PATH}'
+UNIFYPATH = QOOXDOOPATH + '/../..'
 JASYPATH = UNIFYPATH + "/support/jasy/jasy"
 
 # Extend PYTHONPATH with 'lib'
@@ -30,14 +31,7 @@ from unify import Qooxdoo
 # Tasks
 #
 
-@task
-def clear():
-    # Setup session
-    session = Session()
 
-    # Clearing cache
-    logging.info("Clearing cache...")
-    session.clearCache()
 
 
 
@@ -61,15 +55,14 @@ def clear():
 #    writefile("build/simple.js", compressedCode)
 
 
-
-@task
-def build():
+def getsession():
     # Setup session
     session = Session()
     
     patcher = Qooxdoo.Patcher(session)
     patcher.patchClasses()
     
+    session.addProject(Project("%s/support/jasy/lib/qxpatchjs" % UNIFYPATH))
     session.addProject(Project("%s/unify/framework" % UNIFYPATH, patcher.treePatcher))
     session.addProject(Project("%s/qooxdoo/qooxdoo/framework" % UNIFYPATH, patcher.treePatcher))
     session.addProject(Project(".", patcher.treePatcher), True)
@@ -79,7 +72,34 @@ def build():
     session.permutateField("locale", ["en"])
     
     session.setField("qx.application", APPLICATION)
-    session.setField("qx.debug", True)
+    session.setField("qx.debug", "true")
+    session.setField("qx.aspects", False)
+    
+    return session
+
+
+@task
+def clear():
+    # Setup session
+    session = getsession()
+
+    # Clearing cache
+    logging.info("Clearing cache...")
+    session.clearCache()
+    
+
+@task
+def api():
+    None
+    
+    
+@task
+def source():
+    None
+
+@task
+def build():
+    session = getsession()
     
     # Permutation independend config
     optimization = Optimization() #Optimization("unused", "privates", "variables", "declarations", "blocks")

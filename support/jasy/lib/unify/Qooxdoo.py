@@ -192,6 +192,9 @@ class Patcher:
             self.__createCall(queryFnt, [queryValue]),
             self.__createValueNode("string", resultValue)
         ])
+        condition.parenthesized = True
+        elsePart.parenthesized = True
+        thenPart.parenthesized = True
         hook = Node(None, "hook")
         hook.append(condition, "condition")
         hook.append(elsePart, "elsePart")
@@ -219,7 +222,7 @@ class Patcher:
                 
         newNode = default if default != None else Node(None, "null")
         for key, value in hookList.items():
-            newNode = self.__createHook("jasy.Env.get", query, key, value, newNode)
+            newNode = self.__createHook("qxpatchjs.Env.getValue", query, key, value, newNode)
         
         parent = node.parent
         parent.replace(node, newNode)
@@ -232,7 +235,7 @@ class Patcher:
             identifier = self.__getCallName(node)
   
             if identifier == "qx.core.Environment.get":
-                p1 = self.__createValueNode("identifier", "jasy")
+                p1 = self.__createValueNode("identifier", "qxpatchjs")
                 p2 = self.__createValueNode("identifier", "Env")
                 p3 = self.__createValueNode("identifier", "getValue")
                 jasyEnv = Node(None, "dot", [Node(None, "dot", [p1, p2]), p3])
@@ -242,7 +245,7 @@ class Patcher:
                 self.__dispatchSelect(node)
     
             elif identifier == "qx.core.Environment.add":
-                p1 = self.__createValueNode("identifier", "jasy")
+                p1 = self.__createValueNode("identifier", "qxpatchjs")
                 p2 = self.__createValueNode("identifier", "Env")
                 p3 = self.__createValueNode("identifier", "define")
                 jasyEnv = Node(None, "dot", [Node(None, "dot", [p1, p2]), p3])
@@ -253,7 +256,7 @@ class Patcher:
             identifier = self.__getCallName(node, node.type)
             
             if identifier == "qx.core.Environment":
-                p1 = self.__createValueNode("identifier", "jasy")
+                p1 = self.__createValueNode("identifier", "qxpatchjs")
                 p2 = self.__createValueNode("identifier", "Env")
                 jasyEnv = Node(None, "dot", [p1, p2])
                 node.replace(node[0], jasyEnv)
@@ -263,7 +266,7 @@ class Patcher:
             identifier1 = self.__getCallName(node[0], node.type)
             identifier2 = self.__getCallName(node[1], node.type)
             
-            p1 = self.__createValueNode("identifier", "jasy")
+            p1 = self.__createValueNode("identifier", "qxpatchjs")
             p2 = self.__createValueNode("identifier", "Env")
             jasyEnv = Node(None, "dot", [p1, p2])
             
