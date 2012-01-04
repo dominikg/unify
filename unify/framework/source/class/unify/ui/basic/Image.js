@@ -40,7 +40,20 @@ qx.Class.define("unify.ui.basic.Image", {
   
   members: {
     _createElement : function() {
-      return document.createElement("img");
+      var style=this.__style||{};
+      style.position="absolute";
+      var attributes={};
+      if(qx.core.Environment.get("qx.debug")){
+        attributes.unifyclass=this.classname;
+        attributes.appearance=this.getAppearance();
+      }
+      var element = new qx.html.Element("img",style,attributes);
+      
+
+      element.$$widget = this.toHashCode();
+
+      
+      return element;
     },
     
     _applySource : function(value) {

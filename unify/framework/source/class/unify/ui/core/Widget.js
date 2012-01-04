@@ -163,13 +163,12 @@ qx.Class.define("unify.ui.core.Widget", {
      */
     getByElement : function(element, considerAnonymousState) {
       while(element) {
-        var widgetKey = element.$$widget;
-
+        var widgetKey = element.$$element;
         // dereference "weak" reference to the widget.
         if (widgetKey != null) {
-          var widget = qx.core.ObjectRegistry.fromHashCode(widgetKey);
+          var widget = unify.ui.core.Widget.__elemToWidgetMap[widgetKey];
           // check for anonymous widgets
-          if (!considerAnonymousState || !widget.getAnonymous()) {
+          if (widget &&(!considerAnonymousState || !widget.getAnonymous())) {
             return widget;
           }
         }
@@ -182,7 +181,14 @@ qx.Class.define("unify.ui.core.Widget", {
         }
       }
       return null;
-    }
+    },
+    __registerElement: function(widget,elem){
+      unify.ui.core.Widget.__elemToWidgetMap[elem.toHashCode()]=widget;
+    },
+    __unregisterElement: function(widget){
+      delete unify.ui.core.Widget.__elemToWidgetMap[widget.getElement().toHashCode()];
+    },
+    __elemToWidgetMap:{}
   },
   
   members: {
@@ -215,7 +221,7 @@ qx.Class.define("unify.ui.core.Widget", {
     
     // property apply
     _applyVisibility : function(value, old)
-    {
+    {/*
       var container = this.getElement();
       var Style = qx.bom.element.Style;
       
@@ -230,8 +236,16 @@ qx.Class.define("unify.ui.core.Widget", {
       var parent = this.$$parent;
       if (parent && (old == null || value == null || old === "excluded" || value === "excluded")) {
         parent.invalidateLayoutChildren();
+      }*/
+      var elem = this.getElement();
+      if(value==="visible"){
+        elem.setStyle("visibility","visible");
+        elem.show();
+      } else if (value==="hidden"){
+        elem.setStyle("visibility","hidden");
+      } else {
+        elem.hide();
       }
-
       // Update visibility cache
       qx.ui.core.queue.Visibility.add(this);
     },
@@ -647,8 +661,14 @@ qx.Class.define("unify.ui.core.Widget", {
      * @return {Map[]} Returns left and top position and width and height of widget
      */
     getPositionInfo : function() {
-      var e = this.getElement();
-      
+      var e = this.getElement().getDomElement();
+      if(!e){
+        qx.html.Element.flush();
+        e=this.getElement().getDomElement();
+        if(!e){
+          return null;
+        }
+      }
       var pos = qx.bom.element.Location.get(e);
       var dim = this.__dimensionInfo || qx.bom.element.Dimension.getSize(e);
       
@@ -697,7 +717,7 @@ qx.Class.define("unify.ui.core.Widget", {
         top += parentInset[1];
       }
       if (!preventSize) {
-        qx.bom.element.Style.setStyles(this.getElement(), {
+        this.getElement().setStyles({
           left: left + "px",
           top: top + "px",
           width: width + "px",
@@ -1322,7 +1342,7 @@ qx.Class.define("unify.ui.core.Widget", {
         qx.ui.core.queue.Layout.add(this);
       }*/
 
-      qx.bom.element.Style.setStyles(this.getElement(), style);
+      this.getElement().setStyles(style);
       
       if (properties) {
         var keys = qx.lang.Object.getKeys(properties);
@@ -1373,7 +1393,8 @@ qx.Class.define("unify.ui.core.Widget", {
       if (value) {
         return value;
       } else {
-        return qx.bom.element.Style.get(this.getElement(), qx.bom.element.Style.property(name), computed);
+        return this.getElement().getStyle(name);
+        //return qx.bom.element.Style.get(this.getElement(), qx.bom.element.Style.property(name), computed);
       }
     },
 
@@ -1408,7 +1429,20 @@ qx.Class.define("unify.ui.core.Widget", {
      * Creates DOM element
      */
     _createElement : function() {
-      throw "_createElement is not implemented";
+      var style=this.__style||{};
+      style.position="absolute";
+      var attributes={};
+      if(qx.core.Environment.get("qx.debug")){
+        attributes.unifyclass=this.classname;
+        attributes.appearance=this.getAppearance();
+      }
+      var element = new qx.html.Element("div",style,attributes);
+      
+
+      element.$$widget = this.toHashCode();
+
+      
+      return element;
     },
     
     /**
@@ -1416,6 +1450,7 @@ qx.Class.define("unify.ui.core.Widget", {
      * 
      * @return {Element} DOM element of widget
      */
+    /*
     __createElement : function() {
         var element = this._createElement();
         
@@ -1437,6 +1472,17 @@ qx.Class.define("unify.ui.core.Widget", {
         }
         
         return element;
+    },
+    */
+    /**
+     * Creates DOM element
+     * 
+     * @return {Element} DOM element of widget
+     */
+    __createElement : function() {
+      var elem= this._createElement();
+      unify.ui.core.Widget.__registerElement(this,elem);
+      return elem;
     },
     
     __widgetChildren : null,
@@ -1765,13 +1811,19 @@ qx.Class.define("unify.ui.core.Widget", {
       var element = child.getElement();
       //qx.bom.element.Style.set(element, "visibility", "hidden");
       var contentElem=this.getContentElement();
+      if(index!=0 && index >=0){
+        contentElem.addAt(element,index);
+      } else {
+        contentElem.add(element);
+      }
+      /*
       var childNodes=contentElem.childNodes;
       if(index!=null && index >=0 && index < childNodes.length){
         contentElem.insertBefore(element,childNodes[index]);
       } else {
         contentElem.appendChild(element);
       }
-      
+      */
       this._getLayout().invalidateLayoutCache();
 
       // Remember parent
@@ -1812,7 +1864,7 @@ qx.Class.define("unify.ui.core.Widget", {
       }
 
       var element = child.getElement();
-      this.getContentElement().removeChild(element);
+      this.getContentElement().remove(element);
       this._getLayout().invalidateLayoutCache();
 
       // Clear parent connection

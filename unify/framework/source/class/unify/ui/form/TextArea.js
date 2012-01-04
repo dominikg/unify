@@ -57,11 +57,11 @@ qx.Class.define("unify.ui.form.TextArea", {
     __changed : false,
     
     _createElement : function() {
-      var e = qx.bom.Input.create("textarea", {
+      var e = new qx.html.Input("textarea",{},{
         rows: this.getRows(),
         cols: this.getColumns()
       });
-      qx.event.Registration.addListener(e, "input", this._onInput, this);
+      e.addListener("input", this._onInput, this);
       return e;
     },
     
@@ -98,7 +98,7 @@ qx.Class.define("unify.ui.form.TextArea", {
      * @param value {String} New value of text area
      */
     setValue : function(value) {
-      qx.bom.Input.setValue(this.getElement(), value);
+      this.getElement().setValue(value);
     },
     
     /**
@@ -107,7 +107,7 @@ qx.Class.define("unify.ui.form.TextArea", {
      * @return {String} Value of text area
      */
     getValue : function() {
-      return qx.bom.Input.getValue(this.getElement());
+      return this.getElement().getValue();
     },
     
     /**

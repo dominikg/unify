@@ -82,7 +82,9 @@ qx.Mixin.define("unify.ui.core.MNavigatable", {
       nullable: true
     }
   },
-  
+  construct: function(){
+    this._applyMNavigatable();
+  },
   members : {
     /**
      * Applies event listeners on widget to support navigation

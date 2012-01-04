@@ -34,11 +34,11 @@ qx.Class.define("unify.ui.other.Arrow", {
     
     // overridden
     _createElement : function() {
-      var e = document.createElement("div");
+      var e = this.base(arguments);
       
       var arrowSpan = this.__arrowSpan = document.createElement("span");
       qx.bom.element.Style.setStyles(arrowSpan,{display:"block",position:"absolute"});
-      e.appendChild(arrowSpan);
+      e.add(arrowSpan);
       
       return e;
     },

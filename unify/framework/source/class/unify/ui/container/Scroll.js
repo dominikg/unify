@@ -235,9 +235,6 @@ qx.Class.define("unify.ui.container.Scroll", {
       return contentWidget;
     },
 
-    _createElement : function() {
-      return document.createElement("div");
-    },
 
     _computeSizeHint : function() {
       // Build size hint and return
@@ -267,7 +264,7 @@ qx.Class.define("unify.ui.container.Scroll", {
 
       var render = function(left, top, zoom, event) {
         self.__inAnimation = !!self.__inTouch;//TODO this evaluates to false during deceleration!
-        Style.set(contentElement,"transform",Transform.accelTranslate((-left) + 'px', (-top) + 'px'));
+        contentElement.setStyle("transform",Transform.accelTranslate((-left) + 'px', (-top) + 'px'),true);
         if (self.__enableScrollX) {
           self.__scrollLeft=left;
         }

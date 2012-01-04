@@ -115,18 +115,21 @@ qx.Class.define("unify.ui.container.scroll.Indicator", {
     _createElement : function()
     {
       var doc = document;
-      var elem = doc.createElement("div");
+      var elem = this.base(arguments);
       //elem.className = "scroll-indicator " + this.getOrientation();
 
       // Build sub elements
-      this.__startElem = elem.appendChild(doc.createElement("div"));
-      this.__middleElem = elem.appendChild(doc.createElement("div"));
-      this.__endElem = elem.appendChild(doc.createElement("div"));
+      var start=this.__startElem =doc.createElement("div");
+      elem.add(start);
+      var middle=this.__middleElem=doc.createElement("div");
+      elem.add(middle);
+      var end=this.__endElem = doc.createElement("div");
+      elem.add(end);
 
       this.__setSliderStyle(this.getOrientation() === "horizontal");
 
       // Listener for animation purposes
-      qx.event.Registration.addListener(elem, "transitionEnd", this.__onTransitionEnd, this, false);
+      elem.addListener( "transitionEnd", this.__onTransitionEnd, this, false);
 
       return elem;
     },
@@ -270,7 +273,7 @@ qx.Class.define("unify.ui.container.scroll.Indicator", {
         if (this.__isVisible)
         {
           var translate = this.__horizontal ? unify.bom.Transform.accelTranslate(position+"px",0) : unify.bom.Transform.accelTranslate(0,position+"px");
-          Style.set(this.getElement(), "transform", translate);
+          this.getElement().setStyle("transform", translate,true);
         }
       }
 
@@ -324,7 +327,7 @@ qx.Class.define("unify.ui.container.scroll.Indicator", {
       {
         // Recover old position
         var translate = this.__horizontal ? unify.bom.Transform.accelTranslate(this.__position + "px", 0) : unify.bom.Transform.accelTranslate(0, this.__position + "px");
-        qx.bom.element.Style.set(this.getElement(), "transform", translate);
+        this.getElement().setStyle("transform", translate,true);
 
         // Fade in
         this.__isFadingOut = false;

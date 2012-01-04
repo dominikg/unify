@@ -35,18 +35,16 @@ qx.Class.define("unify.view.PopOverManager",
     
     var setStyles = qx.lang.Function.bind(qx.bom.element.Style.setStyles, qx.bom.element.Style);
     
-    var pblocker = this.__pblocker = document.createElement("div");
-    setStyles(pblocker, {
-      "position": "absolute",
-      "left": 0,
-      "top": 0,
-      "width": "100%",
-      "height": "100%",
-      "display": "none"
-    });
-    pblocker.id = "popover-blocker";
-    var mblocker = this.__mblocker = document.createElement("div");
-    setStyles(mblocker, {
+    var pblocker = this.__pblocker = new qx.html.Element("div",{
+          "position": "absolute",
+          "left": 0,
+          "top": 0,
+          "width": "100%",
+          "height": "100%",
+          "display": "none"
+        },{id:"popover-blocker"});
+
+    var mblocker = this.__mblocker = new qx.html.Element("div",{
       "position": "absolute",
       "left": 0,
       "top": 0,
@@ -55,11 +53,10 @@ qx.Class.define("unify.view.PopOverManager",
       "display": "none",
       "backgroundColor": "#000",
       "opacity": 0.5
-    });
-    mblocker.id = "modal-blocker";
-    qx.event.Registration.addListener(pblocker,'tap',this.__onTapBlocker,this);
-    this.__root.getElement().appendChild(pblocker);
-    this.__root.getElement().appendChild(mblocker);
+    },{id:"modal-blocker"});
+    pblocker.addListener('tap',this.__onTapBlocker,this);
+    this.__root.getElement().add(pblocker);
+    this.__root.getElement().add(mblocker);
   },
   
   events : {
@@ -118,8 +115,8 @@ qx.Class.define("unify.view.PopOverManager",
     {
       var zIndexBase=100;//TODO read base value from config or some other global strategy to play nice with other zIndex dependant features like transition animations
       var visible = this.__visibleViewManagers;
-      var pblocker = this.__pblocker;
-      var mblocker = this.__mblocker;
+      var pblocker = this.__pblocker.getDomElement();
+      var mblocker = this.__mblocker.getDomElement();
 
       var numVisible=visible.length;
       for (var i=0; i<numVisible; i++) {

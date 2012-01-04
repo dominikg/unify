@@ -91,8 +91,8 @@ qx.Class.define("unify.ui.form.TextField", {
         attrib.pattern = "[0-9]*";
       }
       
-      var e = qx.bom.Input.create("text", attrib);
-      qx.event.Registration.addListener(e, "input", this._onInput, this);
+      var e = new qx.html.Input("text",{}, attrib);
+      e.addListener("input", this._onInput, this);
 
       return e;
     },
@@ -104,7 +104,7 @@ qx.Class.define("unify.ui.form.TextField", {
      */
     setValue : function(value) {
       this.__changed = true;
-      qx.bom.Input.setValue(this.getElement(), value);
+      this.getElement().setValue(value);
     },
     
     /**
@@ -113,7 +113,7 @@ qx.Class.define("unify.ui.form.TextField", {
      * @return {String} Value of input field
      */
     getValue : function() {
-      return qx.bom.Input.getValue(this.getElement());
+      return this.getElement().getValue();
     },
     
     _applyType : function(value) {

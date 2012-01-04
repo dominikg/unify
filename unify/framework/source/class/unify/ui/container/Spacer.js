@@ -29,8 +29,6 @@ qx.Class.define("unify.ui.container.Spacer", {
   },
   
   members : {
-    _createElement : function() {
-      return document.createElement("div");
-    }
+
   }
 });

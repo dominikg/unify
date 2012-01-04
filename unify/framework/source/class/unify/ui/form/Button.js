@@ -53,7 +53,7 @@ qx.Class.define("unify.ui.form.Button", {
     _createElement : function() {
       var e = this.base(arguments);
       
-      qx.event.Registration.addListener(e, "tap", this.__onTap, this);
+      e.addListener("tap", this.__onTap, this);
       
       return e;
     },

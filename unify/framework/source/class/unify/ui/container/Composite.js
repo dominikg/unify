@@ -42,9 +42,7 @@ qx.Class.define("unify.ui.container.Composite", {
   },
   
   members : {
-    _createElement : function() {
-      return document.createElement("div");
-    }
+
   },
   
   defer : function(statics, members) {

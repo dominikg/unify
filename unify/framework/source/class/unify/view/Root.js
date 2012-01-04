@@ -57,7 +57,7 @@ qx.Class.define("unify.view.Root", {
     
     // overridden
     _createElement : function() {
-      return this.__rootElement;
+      return new qx.html.Root(this.__rootElement);
     },
     
     // overridden

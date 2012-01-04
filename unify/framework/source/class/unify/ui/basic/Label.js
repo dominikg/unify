@@ -82,7 +82,11 @@ qx.Class.define("unify.ui.basic.Label", {
   
     // overridden
     _createElement : function() {
-      return qx.bom.Label.create(this.getValue(), this.getHtml());
+      var label= new qx.html.Label();
+      label.setRich(this.getHtml());
+      label.setValue(this.getValue());
+      return label;
+      //return qx.bom.Label.create(this.getValue(), this.getHtml());
     },
     
     // overridden

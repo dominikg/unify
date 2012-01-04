@@ -210,6 +210,7 @@ qx.Class.define("unify.view.StaticView",
      *
      * @return {Element} DOM element of the view (root element)
      */
+    /*
     getElement : function() {
       //return this.getLayer().getElement();
       //console.error("getElement");
@@ -217,7 +218,7 @@ qx.Class.define("unify.view.StaticView",
       qx.bom.element.Class.add(e, "layer");
       return e;
     },
-
+*/
 
     /**
      * Returns the title of the view

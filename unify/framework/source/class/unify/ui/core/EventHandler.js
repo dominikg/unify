@@ -208,12 +208,10 @@ qx.Class.define("unify.ui.core.EventHandler",
     // interface implementation
     registerEvent : function(target, type, capture)
     {
-      var elem;
-
-      elem = target.getElement();
+      var elem = target.getElement();
       
       if (elem) {
-        qx.event.Registration.addListener(elem, type, this._dispatchEvent, this, capture);
+        elem.addListener( type, this._dispatchEvent, this, capture);
       }
     },
 
@@ -226,7 +224,7 @@ qx.Class.define("unify.ui.core.EventHandler",
       elem = target.getElement();
 
       if (elem) {
-        qx.event.Registration.addListener(elem, type, this._dispatchEvent, this, capture);
+        elem.removeListener( type, this._dispatchEvent, this, capture);
       }
     }
   },

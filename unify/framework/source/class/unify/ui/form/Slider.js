@@ -106,12 +106,6 @@ qx.Class.define("unify.ui.form.Slider", {
       return control || this.base(arguments, id);
     },
     
-    _createElement : function() {
-      var e = document.createElement("div");
-      
-      return e;
-    },
-    
     __touchLeft : null,
     __touchTop : null,
     __calcWidth : null,

@@ -32,12 +32,7 @@ qx.Class.define("unify.ui.embed.Html", {
   },
   
   members : {
-    
-    // overridden
-    _createElement : function() {
-      var div = document.createElement("div");
-      return div;
-    },
+
     
     // overridden
     _hasHeightForWidth : function() {

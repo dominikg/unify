@@ -27,8 +27,6 @@ qx.Class.define("unify.ui.basic.Content", {
   },
   
   members : {
-    _createElement : function() {
-      return document.createElement("div");
-    }
+
   }
 });
